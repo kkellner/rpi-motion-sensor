@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+
+
+    <script type='text/javascript' src='https://code.jquery.com/jquery-1.9.1.js'></script>
+    <script type='text/javascript'>//<![CDATA[ 
+
+        var motionSensorData = {};
+
+
+        $(document).ready(function () {
+            autoRefresh();
+        });
+
+        $(window).load(function () {
+            // Do nothing
+        });
+
+        function autoRefresh() {
+            getLatestData(false);
+            setTimeout(autoRefresh, 1000);
+        }
+
+        function getLatestData(async) {
+            var dataUrl = "/v1/data";
+            // Enable locally development of html
+            if (window.location.protocol == "file:") {
+                dataUrl = "http://rpitest2.local" + dataUrl;
+            }
+
+            $.ajax({
+                url: dataUrl,
+                async: async,
+                timeout: 15000
+            })
+                .done(function (data) {
+                    motionSensorData = data;
+                    updateData();
+                })
+                .fail(function (jqxhr, textStatus, errorThrown) {
+                    console.log("AJAX call HTTP status: " + jqxhr.status + " Error: [" + textStatus + "] : [" + errorThrown + "]");
+                    motionSensorData = { };
+                    updateData();
+                });
+
+        }
+
+        function updateData() {
+
+            for (var elementId in motionSensorData) {
+                var element = document.getElementById(elementId);
+                if (element != null) {
+                    element.innerText = motionSensorData[elementId];
+                }
+            }
+            var element = null
+
+            rpiInfo = motionSensorData['rpiInfo']
+            if (rpiInfo != null) {
+                updateField('wifiSignal', 'signal')
+                updateField('rxbitrate', 'rx bitrate')
+                updateField('txbitrate', 'tx bitrate')
+                updateField('freq', 'freq')
+                updateField('RX', 'RX')
+                updateField('TX', 'TX')
+                updateField('connectedtime', 'connected time')
+            }
+
+        }
+
+        function updateField(elementName, jsonFieldName) {
+            element = document.getElementById(elementName);
+            rpiInfo = motionSensorData['rpiInfo']
+            if (rpiInfo != null) {
+                element.innerText = motionSensorData['rpiInfo'][jsonFieldName]
+            }
+        }
+
+    //]]>
+    </script>
+
+    <style>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0px;
+            border: 0;
+            display: block;
+            font-size: 2vw;
+        }
+
+        th {
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            background-color: #ccc;
+        }
+
+        .disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .center {
+            position: relative;
+        }
+
+        #container {
+            padding-top: 30px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div id="container">
+        <span id="buttonStateBar">
+        </span>
+        <table>
+            <tr>
+                <th colspan="2">Temperatures</th>
+            </tr>
+            <tr>
+                <td>RPi:</td>
+                <td><span id="temperature"></span>&deg;</td>
+            </tr>
+            <tr>
+                <th colspan="2">Details</th>
+            </tr>
+                
+            <tr>
+                <td>Motion PIR State:</td>
+                <td><span id="motionPirState"></span></td>
+            </tr>
+            <tr>
+                <td>Motion Microwave State:</td>
+                <td><span id="motionMicrowaveState"></span></td>
+            </tr>            
+            <tr>
+                <td>CPU:</td>
+                <td><span id="cpuPercent"></span>%</td>
+            </tr>
+            <tr>
+                <td>RPi Time:</td>
+                <td><span id="rpiTime"></span></td>
+            </tr>
+            <tr>
+                <th colspan="2">Wifi</th>
+            </tr>
+            <tr>
+                <td>Wifi signal:</td>
+                <td><span id="wifiSignal"></span></td>
+            </tr>
+            <tr>
+                <td>RX bitrate:</td>
+                <td><span id="rxbitrate"></span></td>
+            </tr>
+            <tr>
+                <td>TX bitrate:</td>
+                <td><span id="txbitrate"></span></td>
+            </tr>
+            <tr>
+                <td>Freq:</td>
+                <td><span id="freq"></span></td>
+            </tr>
+            <tr>
+                <td>RX:</td>
+                <td><span id="RX"></span></td>
+            </tr>
+            <tr>
+                <td>TX:</td>
+                <td><span id="TX"></span></td>
+            </tr>
+            <tr>
+                <td>Connected:</td>
+                <td><span id="connectedtime"></span></td>
+            </tr>
+        </table>
+    </div>
+
+</body>
+
+</html>

@@ -1,2 +1,2 @@
-# rpi-motion-sensor
-Raspberry Pi motion sensor project -- Monitors PIR and Microwave motion sensors and publishes via MQTT
+# rpi-halloween-tombstone-lights
+Raspberry PI software to control halloween tombstone lights
