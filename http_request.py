@@ -36,6 +36,7 @@ class HttpServer():
             }
 
         endpointsPOST = { 
+            "/v1/publishEvent": "v1_publishEvent"
             }
 
         socketserver.TCPServer.allow_reuse_address = True
@@ -117,20 +118,29 @@ class GetRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.end_headers() 
 
 
-    def do_POSTx(self):
-        print('-----------------------')
-        print('POST %s (from client %s)' % (self.path, self.client_address))
-        print(self.headers)
-        content_length = int(self.headers['Content-Length'])
-        post_data = json.loads(self.rfile.read(content_length))
-        print(json.dumps(post_data, indent=4, sort_keys=True))
-        self.send_response(200)
-        self.end_headers()
+    # def do_POST(self):
+    #     print('-----------------------')
+    #     print('POST %s (from client %s)' % (self.path, self.client_address))
+    #     print(self.headers)
+    #     content_length = int(self.headers['Content-Length'])
+    #     post_data = json.loads(self.rfile.read(content_length))
+    #     print(json.dumps(post_data, indent=4, sort_keys=True))
+    #     self.send_response(200)
+    #     self.end_headers()
 
-    def post_exampleState(self, post_data):
-        logger.info("post_exampleState: "+ str(post_data))
-        # Do something here
-        response = { 'status': 'sucess'}
+    def post_v1_publishEvent(self, post_data):
+        logger.info("post_v1_publishEvent: "+ str(post_data))
+    
+        queueName = post_data["queueName"]
+        eventData = post_data["eventData"]
+        msg_info = self.motion.motion_sensor.publishEventObject(queueName, eventData)
+
+        if msg_info.rc == 0:
+            status = "success"
+        else:
+            status = "failure"
+
+        response = { 'status': status, "rc": msg_info.rc, "mid": msg_info.mid}
         self.__send_json_response(response)
         return
 
